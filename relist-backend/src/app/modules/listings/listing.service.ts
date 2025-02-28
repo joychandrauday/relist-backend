@@ -24,6 +24,11 @@ const updateListingService = async (id: string, updateData: IListing) => {
 const deleteListingService = async (id: string) => {
     return await listingModel.findByIdAndDelete(id);
 };
+// get listing by user email
+
+const getListingByUserIdService = async (userId: string) => {
+    return await listingModel.find({ userID: userId });
+};
 
 export const listingService = {
     createListingService,
@@ -31,5 +36,6 @@ export const listingService = {
     getListingByIdService,
     updateListingService,
     deleteListingService,
+    getListingByUserIdService
 
 }

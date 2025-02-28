@@ -27,7 +27,7 @@ const getSingleUser = async (identifier: string) => {
   }
 
   // Populate 'cart' with 'name' and 'price' fields from the Product model
-  const user = await userModel.findOne({ email: identifier })
+  const user = await userModel.findById(identifier)
   return user;
 }
 // get single user by email

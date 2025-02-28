@@ -161,6 +161,32 @@ const deletingListing = async (req: Request, res: Response) => {
         });
     }
 };
+// 6. get listings by user email
+
+const gettingListingsByUserEmail = async (req: Request, res: Response) => {
+    try {
+        const userEmail = req.user.email;
+        const user = await userService.getSingleUserById(userEmail);
+
+
+        const listings = await listingService.getListingByUserIdService(user._id);
+
+        sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: 'Listings retrieved successfully',
+            data: listings
+        });
+    } catch (error) {
+        sendResponse(res, {
+            statusCode: StatusCodes.BAD_REQUEST,
+            success: false,
+            message: error.message || 'Failed to retrieve listings',
+            data: {}
+        });
+    }
+};
+
 
 // Applying the verifyToken middleware to protect routes that need authentication
 export const listingController = {
@@ -168,5 +194,6 @@ export const listingController = {
     gettingListings: [gettingListings],
     gettingListing,
     updatingListing: [verifyToken, updatingListing],
-    deletingListing: [verifyToken, deletingListing]
+    deletingListing: [verifyToken, deletingListing],
+    gettingListingsByUserEmail: [verifyToken, gettingListingsByUserEmail]
 };
