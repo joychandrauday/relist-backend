@@ -57,13 +57,13 @@ export const loginUser = async ({ email, password }: { email: string; password: 
    const accessToken = createToken(
       jwtPayload,
       config.jwt_access_secret as string,
-      parseInt(config.jwt_access_expires_in as string, 10)
+      config.jwt_access_expires_in as string
    );
 
    const refreshToken = createToken(
       jwtPayload,
       config.jwt_refresh_secret as string,
-      parseInt(config.jwt_refresh_expires_in as string, 10)
+      config.jwt_refresh_expires_in as string
    );
 
    return {
