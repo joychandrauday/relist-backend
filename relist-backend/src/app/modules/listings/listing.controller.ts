@@ -12,7 +12,6 @@ const addingListing = async (req: Request, res: Response) => {
         const listing = req.body;
         const user = await userService.getSingleUser(req.user.email);
         listing.userID = user._id;
-        console.log(user._id);
 
         // Create the listing with the added userId
         const newListing = await listingService.createListingService(listing);
@@ -85,13 +84,27 @@ const gettingListing = async (req: Request, res: Response) => {
 const updatingListing = async (req: Request, res: Response) => {
     try {
         const listingId = req.params.listingId;
-        const updatedListing = req.body;
-        const updatedListingData = await listingService.updateListingService(listingId, updatedListing);
 
-        if (!updatedListingData) {
+        // Fetch the existing listing
+        const existingListing = await listingService.getListingByIdService(listingId);
+        if (!existingListing) {
             throw new AppError(StatusCodes.NOT_FOUND, 'Listing not found');
         }
 
+        // Fetch user details
+        const user = await userService.getSingleUser(req.user.email);
+        console.log(existingListing.userID.toString(), user._id.toString(), user.email);
+
+        // Ensure the user is authorized to update the listing
+        if (existingListing.userID.toString() !== user._id.toString()) {
+            throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
+        }
+
+        // Update the listing
+        const updatedListing = req.body;
+        const updatedListingData = await listingService.updateListingService(listingId, updatedListing);
+
+        // Send success response
         sendResponse(res, {
             statusCode: StatusCodes.OK,
             success: true,
@@ -99,6 +112,7 @@ const updatingListing = async (req: Request, res: Response) => {
             data: updatedListingData
         });
     } catch (error) {
+        // Send error response
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
@@ -108,10 +122,24 @@ const updatingListing = async (req: Request, res: Response) => {
     }
 };
 
+
 // 5. Delete a listing from the database
 const deletingListing = async (req: Request, res: Response) => {
     try {
         const listingId = req.params.listingId;
+        // Fetch the existing listing
+        const existingListing = await listingService.getListingByIdService(listingId);
+        if (!existingListing) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'Listing not found');
+        }
+        // Fetch user details
+        const user = await userService.getSingleUser(req.user.email);
+        console.log(existingListing.userID.toString(), user._id.toString(), user.email);
+
+        // Ensure the user is authorized to update the listing
+        if (existingListing.userID.toString() !== user._id.toString()) {
+            throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
+        }
         const deletedListing = await listingService.deleteListingService(listingId);
 
         if (!deletedListing) {
@@ -137,7 +165,7 @@ const deletingListing = async (req: Request, res: Response) => {
 // Applying the verifyToken middleware to protect routes that need authentication
 export const listingController = {
     addingListing: [verifyToken, addingListing],
-    gettingListings: [verifyToken, gettingListings],
+    gettingListings: [gettingListings],
     gettingListing,
     updatingListing: [verifyToken, updatingListing],
     deletingListing: [verifyToken, deletingListing]

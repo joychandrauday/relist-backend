@@ -19,7 +19,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
             ) as JwtPayload;
 
             const { email } = decoded;
-            console.log(email);
 
             const user = await userService.getSingleUserById(email);
 
@@ -29,8 +28,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
                     'This user is not found!'
                 );
             }
-
-            console.log(user);
             req.user = decoded as JwtPayload & { role: string };
             next();
         } catch (error) {
