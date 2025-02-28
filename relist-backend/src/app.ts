@@ -1,11 +1,12 @@
 // 1. Sending requests to db from client
 
-import express, { Application, NextFunction, Request, Response } from 'express';
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
 import router from './app/routes';
 import os from "os";
 import { StatusCodes } from "http-status-codes";
+import globalErrorHandler from './app/modules/Utils/errorHandler';
 
 
 const app: Application = express();
@@ -45,7 +46,7 @@ app.use(cors({ origin: ["http://localhost:5173", "https://student-stationary-fro
 app.get('/api/v1/', (req: Request, res: Response) => {
   res.send('Hello World from RELIST backend!!!');
 });
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/", (req: Request, res: Response) => {
   const currentDateTime = new Date().toISOString();
   const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const serverHostname = os.hostname();
@@ -76,7 +77,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api/v1", router);
 
-
+app.use(globalErrorHandler);
 
 
 export default app;

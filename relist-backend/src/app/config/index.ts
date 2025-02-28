@@ -17,6 +17,7 @@ export default {
   sp_prefix: process.env.SP_PREFIX, // Make sure DB_URL is in your .env file
   return_url: process.env.SP_RETURN_URL, // Make sure DB_URL is in your .env file
   cancel_url: process.env.SP_CANCEL_URL,
+  NODE_ENV: process.env.NODE_ENV,
 };
 
 
