@@ -12,7 +12,7 @@ export const registeringUserService = async (newUser: { name: string; email: str
    const { name, email, password } = newUser;
 
    // Check if the user already exists
-   const existingUser = await userService.getSingleUser(email);
+   const existingUser = await userService.getSingleUserById(email);
    if (existingUser) {
       throw new AppError(httpStatus.BAD_REQUEST, "User already exists with this email");
    }
