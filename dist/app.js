@@ -7,10 +7,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const product_routes_1 = require("./app/modules/Products/product.routes");
-const order_routes_1 = require("./app/modules/Orders/order.routes");
-const user_routes_1 = require("./app/modules/Users/user.routes");
-const payment_routes_1 = require("./app/modules/Payments/payment.routes");
+const routes_1 = __importDefault(require("./app/routes"));
+const os_1 = __importDefault(require("os"));
+const http_status_codes_1 = require("http-status-codes");
+const errorHandler_1 = __importDefault(require("./app/modules/Utils/errorHandler"));
 const app = (0, express_1.default)();
 // Middleware
 // app.use(express.json());
@@ -41,11 +41,33 @@ app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({ origin: ["http://localhost:5173", "https://student-stationary-frontend.vercel.app"], credentials: true }));
 // Default route
 app.get('/api/v1/', (req, res) => {
-    res.send('Hello World frpm stationary backend!!!');
+    res.send('Hello World from RELIST backend!!!');
 });
-//appllication routes
-app.use('/api/v1/users', user_routes_1.userRoutes); // product routes
-app.use('/api/v1/products', product_routes_1.productRoutes); // product routes
-app.use('/api/v1/orders', order_routes_1.orderRoutes); // order routes
-app.use('/api/v1/payment', payment_routes_1.paymentRoutes); // order routes
+app.get("/", (req, res) => {
+    const currentDateTime = new Date().toISOString();
+    const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const serverHostname = os_1.default.hostname();
+    const serverPlatform = os_1.default.platform();
+    const serverUptime = os_1.default.uptime();
+    res.status(http_status_codes_1.StatusCodes.OK).json({
+        success: true,
+        message: "Welcome to RELIST",
+        version: "1.0.0",
+        clientDetails: {
+            ipAddress: clientIp,
+            accessedAt: currentDateTime,
+        },
+        serverDetails: {
+            hostname: serverHostname,
+            platform: serverPlatform,
+            uptime: `${Math.floor(serverUptime / 60 / 60)} hours ${Math.floor((serverUptime / 60) % 60)} minutes`,
+        },
+        developerContact: {
+            email: "joychandraud@gmail.com",
+            website: "joychandrauday.vercel.app",
+        },
+    });
+});
+app.use("/api/v1", routes_1.default);
+app.use(errorHandler_1.default);
 exports.default = app;

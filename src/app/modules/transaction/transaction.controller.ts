@@ -15,10 +15,15 @@ const getPurchases = async (req: Request, res: Response) => {
             data: purchases
         });
     } catch (error) {
+        let errorMessage = 'Failed to fetch purchase history.';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to fetch purchase history',
+            message: errorMessage,
             data: {}
         });
     }
@@ -35,10 +40,15 @@ const getSales = async (req: Request, res: Response) => {
             data: sales
         });
     } catch (error) {
+        let errorMessage = 'Failed to sales history.';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to fetch sales history',
+            message: errorMessage,
             data: {}
         });
     }
@@ -55,10 +65,15 @@ const createTransaction = async (req: Request, res: Response) => {
             data: newTransaction
         });
     } catch (error) {
+        let errorMessage = 'Failed to create transaction.'
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to create transaction',
+            message: errorMessage,
             data: {}
         });
     }
@@ -85,10 +100,15 @@ const updateTransaction = async (req: Request, res: Response) => {
             data: updatedTransaction
         });
     } catch (error) {
+        let errorMessage = 'Failed to Update Transaction';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to update transaction',
+            message: errorMessage,
             data: {}
         });
     }

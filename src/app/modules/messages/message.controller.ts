@@ -16,10 +16,15 @@ const sendMessage = async (req: Request, res: Response) => {
             data: newMessage
         });
     } catch (error) {
+        let errorMessage = 'Failed to send message';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to send message',
+            message: errorMessage,
             data: {}
         });
     }
@@ -37,10 +42,15 @@ const getUserMessages = async (req: Request, res: Response) => {
             data: messages
         });
     } catch (error) {
+        let errorMessage = 'Failed to retrieve message';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to retrieve messages',
+            message: errorMessage,
             data: {}
         });
     }

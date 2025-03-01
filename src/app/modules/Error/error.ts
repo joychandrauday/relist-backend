@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export class ZodValidationError extends Error {
     errors(errors: any): string | undefined {
         throw new Error("Method not implemented.");

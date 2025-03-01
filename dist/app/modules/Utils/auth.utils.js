@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyToken = exports.createToken = void 0;
+exports.verifyJwtToken = exports.createToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const createToken = (jwtPayload, secret, expiresIn) => {
     return jsonwebtoken_1.default.sign(jwtPayload, secret, {
@@ -11,7 +11,7 @@ const createToken = (jwtPayload, secret, expiresIn) => {
     });
 };
 exports.createToken = createToken;
-const verifyToken = (token, secret) => {
+const verifyJwtToken = (token, secret) => {
     return jsonwebtoken_1.default.verify(token, secret);
 };
-exports.verifyToken = verifyToken;
+exports.verifyJwtToken = verifyJwtToken;

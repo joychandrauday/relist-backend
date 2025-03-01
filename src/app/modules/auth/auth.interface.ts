@@ -1,4 +1,4 @@
-import { UserRole } from "../user/user.interface";
+
 
 export interface IAuth {
   email: string;
@@ -18,6 +18,6 @@ export interface IJwtPayload {
   name: string;
   email: string;
   hasShop: boolean;
-  role: UserRole;
+  role: string;
   isActive: boolean;
 }

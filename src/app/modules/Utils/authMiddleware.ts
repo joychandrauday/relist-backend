@@ -1,22 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../Error/AppError';
 import config from '../../config';
 import { userService } from '../Users/user.service';
+import { AuthenticatedRequest } from '../listings/listing.controller';
 
-export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { authorization } = req.headers
+        const { authorization } = req.headers;
         if (!authorization) {
             throw new AppError(StatusCodes.UNAUTHORIZED, 'Authorization token is required');
         }
-        // Verify the token using JWT_SECRET
+
         try {
             const decoded = jwt.verify(
                 authorization,
                 config.jwt_access_secret as string
-            ) as JwtPayload;
+            ) as JwtPayload & { email: string; role: string };
 
             const { email } = decoded;
 
@@ -28,7 +29,9 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
                     'This user is not found!'
                 );
             }
-            req.user = decoded as JwtPayload & { role: string };
+
+            req.user = decoded; // ✅ এখন টাইপ ম্যাচ করবে
+
             next();
         } catch (error) {
             if (error instanceof TokenExpiredError) {
@@ -47,3 +50,4 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 };
+

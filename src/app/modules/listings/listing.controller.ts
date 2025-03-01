@@ -5,13 +5,22 @@ import sendResponse from '../Utils/sendResponse';
 import AppError from '../Error/AppError';
 import { verifyToken } from '../Utils/authMiddleware';
 import { userService } from '../Users/user.service';
+export interface AuthenticatedRequest extends Request {
+    user?: { email: string, role: string };
+}
 
 // 1. Add a new listing to the database
-const addingListing = async (req: Request, res: Response) => {
+const addingListing = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const listing = req.body;
-        const user = await userService.getSingleUser(req.user.email);
-        listing.userID = user._id;
+        if (!req.user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+        const userdb = await userService.getSingleUser(req.user.email);
+        if (!userdb) {
+            throw new Error("Unauthorized request");
+        }
+        listing.userID = userdb._id;
 
         // Create the listing with the added userId
         const newListing = await listingService.createListingService(listing);
@@ -24,10 +33,15 @@ const addingListing = async (req: Request, res: Response) => {
             data: newListing
         });
     } catch (error) {
+        let errorMessage = "Failed to add listing";
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to add listing',
+            message: errorMessage,
             data: {}
         });
     }
@@ -45,10 +59,15 @@ const gettingListings = async (req: Request, res: Response) => {
             data: listings
         });
     } catch (error) {
+        let errorMessage = 'Failed to retrieve listings'
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to retrieve listings',
+            message: errorMessage,
             data: {}
         });
     }
@@ -71,17 +90,22 @@ const gettingListing = async (req: Request, res: Response) => {
             data: listing
         });
     } catch (error) {
+        let errorMessage = 'Failed to retrieve listing'
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to retrieve listing',
+            message: errorMessage,
             data: {}
         });
     }
 };
 
 // 4. Update a listing
-const updatingListing = async (req: Request, res: Response) => {
+const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const listingId = req.params.listingId;
 
@@ -90,11 +114,16 @@ const updatingListing = async (req: Request, res: Response) => {
         if (!existingListing) {
             throw new AppError(StatusCodes.NOT_FOUND, 'Listing not found');
         }
+        if (!req.user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
 
+        }
         // Fetch user details
         const user = await userService.getSingleUser(req.user.email);
-        console.log(existingListing.userID.toString(), user._id.toString(), user.email);
+        if (!user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
 
+        }
         // Ensure the user is authorized to update the listing
         if (existingListing.userID.toString() !== user._id.toString()) {
             throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
@@ -112,11 +141,15 @@ const updatingListing = async (req: Request, res: Response) => {
             data: updatedListingData
         });
     } catch (error) {
-        // Send error response
+        let errorMessage = 'Failed to update listing';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to update listing',
+            message: errorMessage,
             data: {}
         });
     }
@@ -124,7 +157,7 @@ const updatingListing = async (req: Request, res: Response) => {
 
 
 // 5. Delete a listing from the database
-const deletingListing = async (req: Request, res: Response) => {
+const deletingListing = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const listingId = req.params.listingId;
         // Fetch the existing listing
@@ -132,8 +165,14 @@ const deletingListing = async (req: Request, res: Response) => {
         if (!existingListing) {
             throw new AppError(StatusCodes.NOT_FOUND, 'Listing not found');
         }
+        if (!req.user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
         // Fetch user details
         const user = await userService.getSingleUser(req.user.email);
+        if (!user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
+        }
         console.log(existingListing.userID.toString(), user._id.toString(), user.email);
 
         // Ensure the user is authorized to update the listing
@@ -153,23 +192,35 @@ const deletingListing = async (req: Request, res: Response) => {
             data: {}
         });
     } catch (error) {
+        let errorMessage = 'Failed to delete listing';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to delete listing',
+            message: errorMessage,
             data: {}
         });
     }
 };
 // 6. get listings by user email
 
-const gettingListingsByUserEmail = async (req: Request, res: Response) => {
+const gettingListingsByUserEmail = async (req: AuthenticatedRequest, res: Response) => {
     try {
+        if (!req.user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+
+        }
         const userEmail = req.user.email;
         const user = await userService.getSingleUserById(userEmail);
 
+        if (!user) {
+            throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+        }
+        const listings = await listingService.getListingByUserIdService(user._id.toString());
 
-        const listings = await listingService.getListingByUserIdService(user._id);
 
         sendResponse(res, {
             statusCode: StatusCodes.OK,
@@ -178,10 +229,15 @@ const gettingListingsByUserEmail = async (req: Request, res: Response) => {
             data: listings
         });
     } catch (error) {
+        let errorMessage = 'Failed to retrieve listings';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
         sendResponse(res, {
             statusCode: StatusCodes.BAD_REQUEST,
             success: false,
-            message: error.message || 'Failed to retrieve listings',
+            message: errorMessage,
             data: {}
         });
     }

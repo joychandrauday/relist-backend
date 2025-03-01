@@ -1,14 +1,7 @@
 // 4.service
 
-import AppError from "../Error/AppError";
 import { IUser } from "./user.interface"
 import { userModel } from "./user.model"
-import httpStatus from 'http-status';
-// registering user by hashed password
-import bcrypt from 'bcrypt';
-import config from "../../config";
-import { createToken, verifyToken } from "../Utils/auth.utils";
-
 
 // get all users
 const getUsers = async () => {

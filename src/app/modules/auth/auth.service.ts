@@ -3,9 +3,10 @@ import { IUser } from "../Users/user.interface";
 import { userModel } from "../Users/user.model";
 import bcrypt from "bcrypt";
 import config from "../../config";
-import { createToken, verifyToken } from "../Utils/auth.utils";
+import { createToken, verifyJwtToken } from "../Utils/auth.utils";
 import httpStatus from "http-status";
 import AppError from "../Error/AppError";
+import { SignOptions } from "jsonwebtoken";
 
 // Registering user service
 export const registeringUserService = async (newUser: { name: string; email: string; password: string }) => {
@@ -37,7 +38,7 @@ export const registeringUserService = async (newUser: { name: string; email: str
 
 // Logging in user
 export const loginUser = async ({ email, password }: { email: string; password: string }) => {
-   const user = await userService.getSingleUser(email);
+   const user = await userService.getSingleUserById(email);
 
    if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -57,13 +58,13 @@ export const loginUser = async ({ email, password }: { email: string; password: 
    const accessToken = createToken(
       jwtPayload,
       config.jwt_access_secret as string,
-      config.jwt_access_expires_in as string
+      config.jwt_access_expires_in as SignOptions["expiresIn"]
    );
 
    const refreshToken = createToken(
       jwtPayload,
       config.jwt_refresh_secret as string,
-      config.jwt_refresh_expires_in as string
+      config.jwt_refresh_expires_in as SignOptions["expiresIn"]
    );
 
    return {
@@ -75,7 +76,7 @@ export const loginUser = async ({ email, password }: { email: string; password: 
 // Refresh access token using refresh token
 export const refreshToken = async (authorization: string) => {
    // Verify if the provided refresh token is valid
-   const decoded = verifyToken(authorization, config.jwt_refresh_secret as string);
+   const decoded = verifyJwtToken(authorization, config.jwt_refresh_secret as string);
    const { email } = decoded;
 
    // Check if the user exists
