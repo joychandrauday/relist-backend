@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../Utils/sendResponse';
 import messageService from './message.service';
+import { verifyToken } from '../Utils/authMiddleware';
 
 const sendMessage = async (req: Request, res: Response) => {
     try {
@@ -46,5 +47,6 @@ const getUserMessages = async (req: Request, res: Response) => {
 };
 
 export const messageController = {
-
+    getUserMessages: [verifyToken, getUserMessages],
+    sendMessage: [verifyToken, sendMessage]
 }
