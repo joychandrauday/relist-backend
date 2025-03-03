@@ -54,7 +54,7 @@ const verifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             if (!user) {
                 throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'This user is not found!');
             }
-            req.user = decoded; // ✅ এখন টাইপ ম্যাচ করবে
+            req.user = decoded;
             next();
         }
         catch (error) {

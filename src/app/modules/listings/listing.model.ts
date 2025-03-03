@@ -1,5 +1,5 @@
 
-import { model, Schema } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { IListing } from './listing.interface';
 
 // single product schema
@@ -13,11 +13,7 @@ const listingSchema = new Schema<IListing>({
   },
   price: { type: Number, required: true },
   images: { type: [String], required: true },
-  userID: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  userID: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   condition: {
     type: String,
     required: true,

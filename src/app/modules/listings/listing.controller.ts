@@ -5,23 +5,21 @@ import sendResponse from '../Utils/sendResponse';
 import AppError from '../Error/AppError';
 import { verifyToken } from '../Utils/authMiddleware';
 import { userService } from '../Users/user.service';
+import mongoose from 'mongoose';
 export interface AuthenticatedRequest extends Request {
-    user?: { email: string, role: string };
+    user?: { email: string, role: string, id: string, };
 }
 
 // 1. Add a new listing to the database
 const addingListing = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const listing = req.body;
+        console.log(listing);
         if (!req.user) {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
         }
-        const userdb = await userService.getSingleUser(req.user.email);
-        if (!userdb) {
-            throw new Error("Unauthorized request");
-        }
-        listing.userID = userdb._id;
 
+        listing.userID = new mongoose.Types.ObjectId(req.user.id);
         // Create the listing with the added userId
         const newListing = await listingService.createListingService(listing);
 
@@ -51,12 +49,13 @@ const addingListing = async (req: AuthenticatedRequest, res: Response) => {
 // 2. Get all listings from the database
 const gettingListings = async (req: Request, res: Response) => {
     try {
-        const listings = await listingService.getAllListingsService();
+        const { listings, meta } = await listingService.getAllListingsService(req.query);
         sendResponse(res, {
             statusCode: StatusCodes.OK,
             success: true,
             message: 'Listings retrieved successfully',
-            data: listings
+            data: listings,
+            meta: meta
         });
     } catch (error) {
         let errorMessage = 'Failed to retrieve listings'
@@ -119,7 +118,7 @@ const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
 
         }
         // Fetch user details
-        const user = await userService.getSingleUser(req.user.email);
+        const user = await userService.getSingleUser(req.user.id);
         if (!user) {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
 
@@ -131,6 +130,7 @@ const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
 
         // Update the listing
         const updatedListing = req.body;
+        console.log(updatedListing);
         const updatedListingData = await listingService.updateListingService(listingId, updatedListing);
 
         // Send success response
@@ -141,6 +141,7 @@ const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
             data: updatedListingData
         });
     } catch (error) {
+        console.log(error);
         let errorMessage = 'Failed to update listing';
 
         if (error instanceof Error) {
@@ -169,7 +170,7 @@ const deletingListing = async (req: AuthenticatedRequest, res: Response) => {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
         }
         // Fetch user details
-        const user = await userService.getSingleUser(req.user.email);
+        const user = await userService.getSingleUser(req.user.id);
         if (!user) {
             throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
         }
@@ -219,7 +220,7 @@ const gettingListingsByUserEmail = async (req: AuthenticatedRequest, res: Respon
         if (!user) {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
         }
-        const listings = await listingService.getListingByUserIdService(user._id.toString());
+        const listings = await listingService.getListingByUserIdService(user._id.toString(), req.query);
 
 
         sendResponse(res, {

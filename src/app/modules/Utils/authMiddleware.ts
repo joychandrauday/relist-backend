@@ -17,7 +17,7 @@ export const verifyToken = async (req: AuthenticatedRequest, res: Response, next
             const decoded = jwt.verify(
                 authorization,
                 config.jwt_access_secret as string
-            ) as JwtPayload & { email: string; role: string };
+            ) as JwtPayload & { email: string; role: string; id: string };
 
             const { email } = decoded;
 
@@ -30,7 +30,7 @@ export const verifyToken = async (req: AuthenticatedRequest, res: Response, next
                 );
             }
 
-            req.user = decoded; // ✅ এখন টাইপ ম্যাচ করবে
+            req.user = decoded;
 
             next();
         } catch (error) {

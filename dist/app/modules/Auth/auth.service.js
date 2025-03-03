@@ -58,6 +58,9 @@ const loginUser = (_a) => __awaiter(void 0, [_a], void 0, function* ({ email, pa
     const jwtPayload = {
         email: user.email,
         role: user.role,
+        id: user._id,
+        avatar: user.avatar,
+        name: user.name,
     };
     const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
     const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in);
@@ -84,6 +87,9 @@ const refreshToken = (authorization) => __awaiter(void 0, void 0, void 0, functi
     const jwtPayload = {
         email: user.email,
         role: user.role,
+        id: user._id,
+        avatar: user.avatar,
+        name: user.name,
     };
     const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, parseInt(config_1.default.jwt_access_expires_in, 10));
     return {

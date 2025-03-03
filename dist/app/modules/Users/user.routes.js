@@ -8,9 +8,9 @@ exports.userRoutes = void 0;
 const express_1 = __importDefault(require("express"));
 const user_controller_1 = require("./user.controller");
 const router = express_1.default.Router();
-router.get('/', user_controller_1.userController.gettingUsers); // add order to db
-router.get('/:id', user_controller_1.userController.gettingSingleUser); // add order to db
-router.get('/single/:id', user_controller_1.userController.gettingSingleUserById); // add order to db
-router.delete('/:id', user_controller_1.userController.deleteUser); // add order to db
+router.get('/', user_controller_1.userController.gettingUsers);
+router.get('/:id', user_controller_1.userController.gettingSingleUser);
+router.get('/single/:id', user_controller_1.userController.gettingSingleUserById);
+router.delete('/:id', user_controller_1.userController.deleteUser);
 router.put('/:id', user_controller_1.userController.updateUser);
 exports.userRoutes = router;

@@ -19,18 +19,16 @@ const sendResponse_1 = __importDefault(require("../Utils/sendResponse"));
 const AppError_1 = __importDefault(require("../Error/AppError"));
 const authMiddleware_1 = require("../Utils/authMiddleware");
 const user_service_1 = require("../Users/user.service");
+const mongoose_1 = __importDefault(require("mongoose"));
 // 1. Add a new listing to the database
 const addingListing = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const listing = req.body;
+        console.log(listing);
         if (!req.user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
-        const userdb = yield user_service_1.userService.getSingleUser(req.user.email);
-        if (!userdb) {
-            throw new Error("Unauthorized request");
-        }
-        listing.userID = userdb._id;
+        listing.userID = new mongoose_1.default.Types.ObjectId(req.user.id);
         // Create the listing with the added userId
         const newListing = yield listing_service_1.listingService.createListingService(listing);
         // Send response
@@ -57,12 +55,13 @@ const addingListing = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 // 2. Get all listings from the database
 const gettingListings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const listings = yield listing_service_1.listingService.getAllListingsService();
+        const { listings, meta } = yield listing_service_1.listingService.getAllListingsService(req.query);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_codes_1.StatusCodes.OK,
             success: true,
             message: 'Listings retrieved successfully',
-            data: listings
+            data: listings,
+            meta: meta
         });
     }
     catch (error) {
@@ -119,7 +118,7 @@ const updatingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
         // Fetch user details
-        const user = yield user_service_1.userService.getSingleUser(req.user.email);
+        const user = yield user_service_1.userService.getSingleUser(req.user.id);
         if (!user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
@@ -129,6 +128,7 @@ const updatingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
         }
         // Update the listing
         const updatedListing = req.body;
+        console.log(updatedListing);
         const updatedListingData = yield listing_service_1.listingService.updateListingService(listingId, updatedListing);
         // Send success response
         (0, sendResponse_1.default)(res, {
@@ -139,6 +139,7 @@ const updatingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
     catch (error) {
+        console.log(error);
         let errorMessage = 'Failed to update listing';
         if (error instanceof Error) {
             errorMessage = error.message;
@@ -164,7 +165,7 @@ const deletingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
         // Fetch user details
-        const user = yield user_service_1.userService.getSingleUser(req.user.email);
+        const user = yield user_service_1.userService.getSingleUser(req.user.id);
         if (!user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'user not found');
         }
@@ -208,7 +209,7 @@ const gettingListingsByUserEmail = (req, res) => __awaiter(void 0, void 0, void 
         if (!user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
-        const listings = yield listing_service_1.listingService.getListingByUserIdService(user._id.toString());
+        const listings = yield listing_service_1.listingService.getListingByUserIdService(user._id.toString(), req.query);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_codes_1.StatusCodes.OK,
             success: true,

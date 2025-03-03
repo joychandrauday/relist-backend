@@ -38,6 +38,7 @@ export const registeringUserService = async (newUser: { name: string; email: str
 
 // Logging in user
 export const loginUser = async ({ email, password }: { email: string; password: string }) => {
+
    const user = await userService.getSingleUserById(email);
 
    if (!user) {
@@ -53,8 +54,10 @@ export const loginUser = async ({ email, password }: { email: string; password: 
    const jwtPayload = {
       email: user.email,
       role: user.role,
+      id: user._id,
+      avatar: user.avatar,
+      name: user.name,
    };
-
    const accessToken = createToken(
       jwtPayload,
       config.jwt_access_secret as string,
@@ -93,6 +96,9 @@ export const refreshToken = async (authorization: string) => {
    const jwtPayload = {
       email: user.email,
       role: user.role,
+      id: user._id,
+      avatar: user.avatar,
+      name: user.name,
    };
 
    const accessToken = createToken(
