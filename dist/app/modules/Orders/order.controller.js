@@ -118,6 +118,7 @@ const getOrdersByUserId = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
     catch (error) {
         // handle and send error response
+        console.log(error);
         res.status(500).json({
             success: false,
             message: 'Error fetching orders',

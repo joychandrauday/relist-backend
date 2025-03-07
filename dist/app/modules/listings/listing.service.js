@@ -18,10 +18,19 @@ const createListingService = (listingData) => __awaiter(void 0, void 0, void 0, 
     return yield newListing.save();
 });
 const getAllListingsService = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const { minPrice, maxPrice, search, status, page = 1, limit } = query;
+    const { minPrice, maxPrice, search, category, status, condition, city, page = 1, limit } = query;
     const filters = {};
     if (status) {
         filters.status = status;
+    }
+    if (category) {
+        filters.category = category;
+    }
+    if (condition) {
+        filters.condition = condition;
+    }
+    if (city) {
+        filters["location.city"] = city;
     }
     if (minPrice || maxPrice) {
         filters.price = {};
@@ -43,8 +52,10 @@ const getAllListingsService = (query) => __awaiter(void 0, void 0, void 0, funct
     const pageNumber = Number(page) > 0 ? Number(page) : 1;
     const limitNumber = limit ? Number(limit) : 10;
     const skip = (pageNumber - 1) * limitNumber;
-    const totalListings = yield listing_model_1.listingModel.countDocuments(filters).populate('userID', 'name avatar email _id');
-    const listingsQuery = listing_model_1.listingModel.find(filters);
+    const totalListings = yield listing_model_1.listingModel.countDocuments(filters);
+    let listingsQuery = listing_model_1.listingModel.find(filters);
+    listingsQuery.populate("userID", 'name email avatar _id');
+    listingsQuery = listingsQuery.sort({ createdAt: -1 });
     if (limitNumber > 0) {
         listingsQuery.skip(skip).limit(limitNumber);
     }
@@ -58,7 +69,7 @@ const getAllListingsService = (query) => __awaiter(void 0, void 0, void 0, funct
     return { listings, meta };
 });
 const getListingByIdService = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield listing_model_1.listingModel.findById(id);
+    return yield listing_model_1.listingModel.findById(id).populate("userID", 'name email avatar _id');
 });
 const updateListingService = (id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
     return yield listing_model_1.listingModel.findByIdAndUpdate(id, updateData, { new: true });
@@ -68,10 +79,13 @@ const deleteListingService = (id) => __awaiter(void 0, void 0, void 0, function*
 });
 // get listing by user email
 const getListingByUserIdService = (userId, query) => __awaiter(void 0, void 0, void 0, function* () {
-    const { minPrice, maxPrice, search, status, page = 1, limit } = query;
+    const { minPrice, maxPrice, search, category, status, page = 1, limit } = query;
     const filters = { userID: userId }; // First filter by userId
     if (status) {
         filters.status = status;
+    }
+    if (category) {
+        filters.category = category;
     }
     if (minPrice || maxPrice) {
         filters.price = {};
@@ -89,7 +103,9 @@ const getListingByUserIdService = (userId, query) => __awaiter(void 0, void 0, v
     const limitNumber = limit ? Number(limit) : 10;
     const skip = (pageNumber - 1) * limitNumber;
     const totalListings = yield listing_model_1.listingModel.countDocuments(filters);
-    const listingsQuery = listing_model_1.listingModel.find(filters).populate('userID', 'name avatar email _id');
+    const listingsQuery = listing_model_1.listingModel
+        .find(filters);
+    listingsQuery.populate("userID", 'name email avatar _id');
     if (limitNumber > 0) {
         listingsQuery.skip(skip).limit(limitNumber);
     }

@@ -19,7 +19,7 @@ const user_service_1 = require("./user.service");
 const gettingUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Save the new user to the database
-        const user = yield user_service_1.userService.getUsers();
+        const user = yield user_service_1.userService.getUsers(req.query);
         // Send success response
         (0, sendResponse_1.default)(res, {
             statusCode: 201,
@@ -112,11 +112,65 @@ const deleteUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         next(error);
     }
 });
+const addToWishlist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const listingId = req.body.listingId;
+        console.log(userId, listingId);
+        // Add the listing to the user's wishlist
+        const updatedUser = yield user_service_1.userService.addItemToWishlist(userId, listingId);
+        if (!updatedUser) {
+            return (0, sendResponse_1.default)(res, {
+                statusCode: 404,
+                success: false,
+                message: 'User not found or Listing not found!',
+                data: null,
+            });
+        }
+        (0, sendResponse_1.default)(res, {
+            statusCode: 200,
+            success: true,
+            message: 'Item added to wishlist successfully!',
+            data: updatedUser,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+// Remove item from wishlist
+const removeFromWishlist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const listingId = req.body.listingId;
+        // Remove the listing from the user's wishlist
+        const updatedUser = yield user_service_1.userService.removeItemFromWishlist(userId, listingId);
+        if (!updatedUser) {
+            return (0, sendResponse_1.default)(res, {
+                statusCode: 404,
+                success: false,
+                message: 'User or Listing not found!',
+                data: null,
+            });
+        }
+        (0, sendResponse_1.default)(res, {
+            statusCode: 200,
+            success: true,
+            message: 'Item removed from wishlist successfully!',
+            data: updatedUser,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
 // sending to routes
 exports.userController = {
     updateUser,
     gettingUsers,
     gettingSingleUser,
     gettingSingleUserById,
-    deleteUser
+    deleteUser,
+    addToWishlist,
+    removeFromWishlist,
 };

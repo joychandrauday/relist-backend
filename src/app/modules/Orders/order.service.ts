@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // 4.service
 
+import mongoose from 'mongoose';
 import { userService } from '../Users/user.service';
 import { IOrder } from './order.interface'
 import { orderModel } from './order.model'
@@ -18,7 +19,7 @@ const addOrderToDB = async (
   client_ip: string,
   newOrder: newOrder
 ) => {
-  const user = await userService.getSingleUserById(newOrder.user)
+  const user = await userService.getSingleUser(newOrder.user)
   let order = await orderModel.create(newOrder);
 
   const paymentDetails = {
@@ -66,16 +67,27 @@ const getOrders = async (startDate?: string, endDate?: string) => {
 // get single order
 
 const getOrderById = async (orderId: string) => {
-  const order = await orderModel.findById(orderId).populate('user', 'name,email')
+  const order = await orderModel.findById(orderId).populate('user', 'name email avatar')
   return order
 }
 
-// get order by userId
 
 const getOrdersByUserId = async (userId: string) => {
-  const orders = await orderModel.find({ user: userId }).populate('user', 'name email').populate('products.productId', 'name ')
-  return orders
-}
+  try {
+    const orders = await orderModel
+      .find({ user: new mongoose.Types.ObjectId(userId) })
+      .populate('user', 'name email')
+      .populate('product.productId', 'title images price')
+
+    console.log(orders);
+    return orders;
+  } catch (error) {
+    console.log(error);
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+};
+
 const getSingleOrderById = async (id: string) => {
   const order = await orderModel.findById(id)
   return order
@@ -121,7 +133,7 @@ const verifyPayment = async (sp_trxn_id: string) => {
   const verifiedResponse = await orderUtils.verifyPayment(sp_trxn_id);
 
   if (verifiedResponse.length) {
-    const res = await orderModel.findOneAndUpdate(
+    await orderModel.findOneAndUpdate(
       { "transaction.id": sp_trxn_id },
       {
         "transaction.code": verifiedResponse[0].sp_code,
@@ -145,7 +157,6 @@ const verifyPayment = async (sp_trxn_id: string) => {
       //       : "Pending",
       // }
     );
-    console.log(res);
   }
   return verifiedResponse;
 };

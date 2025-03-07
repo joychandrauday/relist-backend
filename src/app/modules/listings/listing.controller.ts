@@ -49,13 +49,12 @@ const addingListing = async (req: AuthenticatedRequest, res: Response) => {
 // 2. Get all listings from the database
 const gettingListings = async (req: Request, res: Response) => {
     try {
-        const { listings, meta } = await listingService.getAllListingsService(req.query);
+        const data = await listingService.getAllListingsService(req.query);
         sendResponse(res, {
             statusCode: StatusCodes.OK,
             success: true,
             message: 'Listings retrieved successfully',
-            data: listings,
-            meta: meta
+            data: data,
         });
     } catch (error) {
         let errorMessage = 'Failed to retrieve listings'
@@ -123,14 +122,14 @@ const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
 
         }
+        console.log(existingListing);
         // Ensure the user is authorized to update the listing
-        if (existingListing.userID.toString() !== user._id.toString()) {
+        if (existingListing.userID._id.toString() !== user._id.toString()) {
             throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
         }
 
         // Update the listing
         const updatedListing = req.body;
-        console.log(updatedListing);
         const updatedListingData = await listingService.updateListingService(listingId, updatedListing);
 
         // Send success response
@@ -174,10 +173,25 @@ const deletingListing = async (req: AuthenticatedRequest, res: Response) => {
         if (!user) {
             throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
         }
-        console.log(existingListing.userID.toString(), user._id.toString(), user.email);
+
 
         // Ensure the user is authorized to update the listing
-        if (existingListing.userID.toString() !== user._id.toString()) {
+        if (req.user.role === 'admin') {
+            const deletedListing = await listingService.deleteListingService(listingId);
+
+            if (!deletedListing) {
+                throw new AppError(StatusCodes.NOT_FOUND, 'Listing not found');
+            }
+
+            sendResponse(res, {
+                statusCode: StatusCodes.OK,
+                success: true,
+                message: 'Listing deleted successfully',
+                data: {}
+            });
+        }
+        // Ensure the user is authorized to update the listing
+        if (existingListing.userID._id.toString() !== user._id.toString()) {
             throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
         }
         const deletedListing = await listingService.deleteListingService(listingId);
@@ -212,7 +226,6 @@ const gettingListingsByUserEmail = async (req: AuthenticatedRequest, res: Respon
     try {
         if (!req.user) {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-
         }
         const userEmail = req.user.email;
         const user = await userService.getSingleUserById(userEmail);

@@ -38,6 +38,7 @@ const registeringUserService = (newUser) => __awaiter(void 0, void 0, void 0, fu
         role: "user",
         status: "active",
         avatar: "",
+        wishlist: []
     };
     // Save user in DB
     const user = yield user_model_1.userModel.create(userData);
@@ -67,6 +68,13 @@ const loginUser = (_a) => __awaiter(void 0, [_a], void 0, function* ({ email, pa
     return {
         accessToken,
         refreshToken,
+        user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+        }
     };
 });
 exports.loginUser = loginUser;

@@ -10,14 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.orderService = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const user_service_1 = require("../Users/user.service");
 const order_model_1 = require("./order.model");
 const order_utils_1 = require("./order.utils");
 // create a new order
 const addOrderToDB = (client_ip, newOrder) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_service_1.userService.getSingleUserById(newOrder.user);
+    const user = yield user_service_1.userService.getSingleUser(newOrder.user);
     let order = yield order_model_1.orderModel.create(newOrder);
     const paymentDetails = {
         amount: order.amount,
@@ -58,13 +62,23 @@ const getOrders = (startDate, endDate) => __awaiter(void 0, void 0, void 0, func
 });
 // get single order
 const getOrderById = (orderId) => __awaiter(void 0, void 0, void 0, function* () {
-    const order = yield order_model_1.orderModel.findById(orderId).populate('user', 'name,email');
+    const order = yield order_model_1.orderModel.findById(orderId).populate('user', 'name email avatar');
     return order;
 });
-// get order by userId
 const getOrdersByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const orders = yield order_model_1.orderModel.find({ user: userId }).populate('user', 'name email').populate('products.productId', 'name ');
-    return orders;
+    try {
+        const orders = yield order_model_1.orderModel
+            .find({ user: new mongoose_1.default.Types.ObjectId(userId) })
+            .populate('user', 'name email')
+            .populate('product.productId', 'title images price');
+        console.log(orders);
+        return orders;
+    }
+    catch (error) {
+        console.log(error);
+        console.error('Error fetching orders:', error);
+        throw error;
+    }
 });
 const getSingleOrderById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const order = yield order_model_1.orderModel.findById(id);
@@ -100,7 +114,7 @@ const calculateRevenueService = () => __awaiter(void 0, void 0, void 0, function
 const verifyPayment = (sp_trxn_id) => __awaiter(void 0, void 0, void 0, function* () {
     const verifiedResponse = yield order_utils_1.orderUtils.verifyPayment(sp_trxn_id);
     if (verifiedResponse.length) {
-        const res = yield order_model_1.orderModel.findOneAndUpdate({ "transaction.id": sp_trxn_id }, {
+        yield order_model_1.orderModel.findOneAndUpdate({ "transaction.id": sp_trxn_id }, {
             "transaction.code": verifiedResponse[0].sp_code,
             "transaction.message": verifiedResponse[0].sp_message,
             "transaction.status": verifiedResponse[0].transaction_status,
@@ -113,7 +127,6 @@ const verifyPayment = (sp_trxn_id) => __awaiter(void 0, void 0, void 0, function
                     ? "Cancelled"
                     : "Pending",
         });
-        console.log(res);
     }
     return verifiedResponse;
 });

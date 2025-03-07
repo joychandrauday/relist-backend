@@ -11,10 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const transaction_model_1 = require("./transaction.model");
 const getPurchasesByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield transaction_model_1.transactionModel.find({ buyerID: userId }).populate('itemID sellerID');
+    return yield transaction_model_1.transactionModel.find({ buyerID: userId }).populate('itemID sellerID orderID');
 });
 const getSalesByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield transaction_model_1.transactionModel.find({ sellerID: userId }).populate('itemID buyerID');
+    return yield transaction_model_1.transactionModel.find({ sellerID: userId }).populate('itemID sellerID orderID buyerID');
 });
 const createTransaction = (transactionData) => __awaiter(void 0, void 0, void 0, function* () {
     return yield transaction_model_1.transactionModel.create(transactionData);

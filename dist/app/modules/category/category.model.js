@@ -23,16 +23,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userModel = void 0;
-// 5.Model
 const mongoose_1 = __importStar(require("mongoose"));
-const userSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, default: "user" },
-    status: { type: String, default: "active" },
-    avatar: { type: String, default: 'https://static.vecteezy.com/system/resources/previews/021/548/095/non_2x/default-profile-picture-avatar-user-avatar-icon-person-icon-head-icon-profile-picture-icons-default-anonymous-user-male-and-female-businessman-photo-placeholder-social-network-avatar-portrait-free-vector.jpg', required: false },
-    wishlist: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Listing' }]
+const categorySchema = new mongoose_1.Schema({
+    name: { type: String, required: true, unique: true },
+    description: { type: String, required: true },
+    icon: { type: String, required: true }
 }, { timestamps: true });
-exports.userModel = (0, mongoose_1.model)('User', userSchema);
+const Category = mongoose_1.default.model('Category', categorySchema);
+exports.default = Category;

@@ -13,4 +13,6 @@ router.get('/:id', user_controller_1.userController.gettingSingleUser);
 router.get('/single/:id', user_controller_1.userController.gettingSingleUserById);
 router.delete('/:id', user_controller_1.userController.deleteUser);
 router.put('/:id', user_controller_1.userController.updateUser);
+router.post("/:id/wishlist", user_controller_1.userController.addToWishlist);
+router.delete("/:id/wishlist", user_controller_1.userController.removeFromWishlist);
 exports.userRoutes = router;

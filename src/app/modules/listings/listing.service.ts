@@ -11,12 +11,22 @@ const createListingService = async (listingData: IListing) => {
 };
 
 const getAllListingsService = async (query: Record<string, unknown>) => {
-    const { minPrice, maxPrice, search, status, page = 2, limit } = query;
+    const { minPrice, maxPrice, search, category, status, condition, city, page = 1, limit } = query;
 
     const filters: Record<string, any> = {};
 
     if (status) {
         filters.status = status;
+    }
+    if (category) {
+        filters.category = category;
+    }
+    if (condition) {
+        filters.condition = condition;
+    }
+
+    if (city) {
+        filters["location.city"] = city;
     }
 
     if (minPrice || maxPrice) {
@@ -29,6 +39,7 @@ const getAllListingsService = async (query: Record<string, unknown>) => {
             filters.price.$lte = Number(maxPrice);
         }
     }
+
     if (search) {
         const searchRegex = new RegExp(search as string, "i"); // Case-insensitive search
         filters.$or = [
@@ -36,24 +47,23 @@ const getAllListingsService = async (query: Record<string, unknown>) => {
             { description: searchRegex }
         ];
     }
+
     // Pagination setup
     const pageNumber = Number(page) > 0 ? Number(page) : 1;
     const limitNumber = limit ? Number(limit) : 10;
     const skip = (pageNumber - 1) * limitNumber;
 
-
     const totalListings = await listingModel.countDocuments(filters);
 
-    const listingsQuery = listingModel.find(filters);
-
+    let listingsQuery = listingModel.find(filters);
     listingsQuery.populate("userID", 'name email avatar _id');
+    listingsQuery = listingsQuery.sort({ createdAt: -1 });
 
     if (limitNumber > 0) {
         listingsQuery.skip(skip).limit(limitNumber);
     }
 
     const listings = await listingsQuery;
-    console.log(listings);
     const meta = {
         total: totalListings,
         page: pageNumber,
@@ -66,8 +76,9 @@ const getAllListingsService = async (query: Record<string, unknown>) => {
 
 
 
+
 const getListingByIdService = async (id: string) => {
-    return await listingModel.findById(id);
+    return await listingModel.findById(id).populate("userID", 'name email avatar _id');
 };
 
 const updateListingService = async (id: string, updateData: IListing) => {
@@ -80,12 +91,15 @@ const deleteListingService = async (id: string) => {
 // get listing by user email
 
 const getListingByUserIdService = async (userId: string, query: Record<string, unknown>) => {
-    const { minPrice, maxPrice, search, status, page = 1, limit } = query;
+    const { minPrice, maxPrice, search, category, status, page = 1, limit } = query;
 
     const filters: Record<string, any> = { userID: userId }; // First filter by userId
 
     if (status) {
         filters.status = status;
+    }
+    if (category) {
+        filters.category = category;
     }
 
     if (minPrice || maxPrice) {

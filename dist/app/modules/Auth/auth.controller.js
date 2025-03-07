@@ -41,7 +41,7 @@ const registeringUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(
 const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     const result = yield auth_service_1.authService.loginUser({ email, password });
-    const { accessToken, refreshToken } = result;
+    const { accessToken, refreshToken, user } = result;
     res.cookie("refreshToken", refreshToken, {
         secure: config_1.default.NODE_ENV === "production",
         httpOnly: true,
@@ -55,6 +55,7 @@ const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
         data: {
             accessToken,
             refreshToken,
+            user
         },
     });
 }));

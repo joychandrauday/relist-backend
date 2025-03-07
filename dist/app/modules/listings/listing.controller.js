@@ -55,13 +55,12 @@ const addingListing = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 // 2. Get all listings from the database
 const gettingListings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { listings, meta } = yield listing_service_1.listingService.getAllListingsService(req.query);
+        const data = yield listing_service_1.listingService.getAllListingsService(req.query);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_codes_1.StatusCodes.OK,
             success: true,
             message: 'Listings retrieved successfully',
-            data: listings,
-            meta: meta
+            data: data,
         });
     }
     catch (error) {
@@ -122,13 +121,13 @@ const updatingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (!user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
+        console.log(existingListing);
         // Ensure the user is authorized to update the listing
-        if (existingListing.userID.toString() !== user._id.toString()) {
+        if (existingListing.userID._id.toString() !== user._id.toString()) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
         }
         // Update the listing
         const updatedListing = req.body;
-        console.log(updatedListing);
         const updatedListingData = yield listing_service_1.listingService.updateListingService(listingId, updatedListing);
         // Send success response
         (0, sendResponse_1.default)(res, {
@@ -169,9 +168,21 @@ const deletingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (!user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'user not found');
         }
-        console.log(existingListing.userID.toString(), user._id.toString(), user.email);
         // Ensure the user is authorized to update the listing
-        if (existingListing.userID.toString() !== user._id.toString()) {
+        if (req.user.role === 'admin') {
+            const deletedListing = yield listing_service_1.listingService.deleteListingService(listingId);
+            if (!deletedListing) {
+                throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'Listing not found');
+            }
+            (0, sendResponse_1.default)(res, {
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                success: true,
+                message: 'Listing deleted successfully',
+                data: {}
+            });
+        }
+        // Ensure the user is authorized to update the listing
+        if (existingListing.userID._id.toString() !== user._id.toString()) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');
         }
         const deletedListing = yield listing_service_1.listingService.deleteListingService(listingId);

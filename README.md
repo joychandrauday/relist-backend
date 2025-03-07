@@ -1,7 +1,7 @@
 # RELIST Backend
 
 A powerful Node.js application designed to deliver seamless functionality with a reliable backend architecture. The project includes robust features for managing data and APIs, ensuring optimal performance and scalability.
-Checkout a demo frontend: [live frontend website](https://student-stationary-frontend.vercel.app/)
+Checkout a demo frontend: [live frontend website](https://relistshop.vercel.app/)
 
 ## Features
 
@@ -39,7 +39,7 @@ Ensure the following are installed on your system:
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/joychandrauday/student-stationary-backend.git
+    git clone https://github.com/joychandrauday/relist-backend.git
     ```
 2.  Navigate to the project directory
     ```bash
@@ -75,37 +75,54 @@ Ensure the following are installed on your system:
         npm run start:dev
     ```
 
+## 📌 API Endpoints
 
-## API Endpoints
+### 🏷️ Listing Management (Products)
+- **GET** `/api/v1/listings` - Retrieve all listings.
+- **GET** `/api/v1/listings/:listingId` - Retrieve a single listing.
+- **POST** `/api/v1/listings` - Add a new listing.
+- **PUT** `/api/v1/listings/:listingId` - Update an existing listing.
+- **DELETE** `/api/v1/listings/:listingId` - Delete a listing.
 
-### Product Management
+### 🏷️ Auth Management
+- **POST** `/api/v1/register` - Register a new user
+- **POST** `/api/v1/login` - log in a new user
 
-- **GET** `/api/v1/products`: Retrieve all products.
-- **GET** `/api/v1/products/:productId`: Retrieve single product.
-- **POST** `/api/v1/products`: Add a new product.
-- **PATCH** `/api/v1/products/:productId`: Update an existing product.
-- **DELETE** `/api/v1/products/:productId`: Delete a product.
 
-### Order Management
+### 📦 Order Management (Track Purchases & Sales)
+- **POST** `/api/v1/orders` - Create a new order.
+- **GET** `/api/v1/orders` - Fetch all orders (Admin).
+- **GET** `/api/v1/orders/user/:userId` - Retrieve orders of a specific user.
+- **GET** `/api/v1/orders/:orderId` - Retrieve order details by Order ID.
+- **PATCH** `/api/v1/orders/:orderId` - Update an order status.
+- **DELETE** `/api/v1/orders/:orderId` - Delete an order by ID.
+- **GET** `/api/v1/orders/verify/payment` - Verify payment.
 
-- **POST** `/api/v1/orders`: Create a new order.
-- **GET** `/api/v1/orders`: Fetch all orders.
-- **GET** `/api/v1/orders/single/:orderId`: Retrieve an order By Order Id.
-- **GET** `/api/v1/orders/:userId`: Retrieve an user orders.
-- **PATCH** `/api/v1/orders/update/:orderId`: Update a order by ID.
-- **GET** `/api/v1/orders/verify/payment`: Verify Payment.
-- **delete** `/api/v1/orders/:orderId`: Delete an order by ID.
+### 💰 Transaction Management
+- **POST** `/api/v1/transactions` - Create a new transaction.
+- **GET** `/api/v1/transactions` - Fetch all transactions (Admin).
+- **GET** `/api/v1/transactions/user/:userId` - Retrieve transaction history for a user.
+- **GET** `/api/v1/transactions/:transactionId` - Retrieve details of a specific transaction.
+- **PATCH** `/api/v1/transactions/:transactionId` - Update transaction status.
+- **DELETE** `/api/v1/transactions/:transactionId` - Delete a transaction.
 
-### User Management
-- **POST** `/api/v1/users/register`: Registering new user.
-- **POST** `/api/v1/users/login`: log in a user.
-- **GET** `/api/v1/users`: Fetch all users.
-- **GET** `/api/v1/users/:id`: Retrieve an User By email.
-- **GET** `/api/v1/users/single/:id`: Retrieve an user users by ID.
-- **PATCH** `/api/v1/users/update/:orderId`: Update a order by ID.
-- **GET** `/api/v1/users/verify/payment`: Verify Payment.
-- **DELETE** `/api/v1/users/:id`: Delete an User by ID.
-- **PATCH** `/api/v1/users/:id`: Update an User by ID.
+### 👤 User Management
+- **GET** `/api/v1/users` - Fetch all users (Admin).
+- **GET** `/api/v1/users/:userId` - Retrieve a user by ID.
+- **PUT** `/api/v1/users/:userId` - Update user profile.
+- **DELETE** `/api/v1/users/:userId` - Delete a user (Admin).
+
+
+### 💬 Messages (Optional)
+- **GET** `/api/v1/messages/:userId` - Fetch user messages.
+- **POST** `/api/v1/messages` - Send a message.
+- **DELETE** `/api/v1/messages/:messageId` - Delete a message.
+
+### 🔧 Admin Management (Optional)
+- **GET** `/api/v1/admin/dashboard` - Admin panel overview.
+- **GET** `/api/v1/admin/users` - Fetch all users (Admin).
+- **PATCH** `/api/v1/admin/users/:userId/unban` - Unban a user.
+- **GET** `/api/v1/admin/listings` - Fetch all listings (Admin).
 
 ## Project Structure
 

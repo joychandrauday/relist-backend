@@ -29,6 +29,7 @@ export const registeringUserService = async (newUser: { name: string; email: str
       role: "user",
       status: "active",
       avatar: "",
+      wishlist: []
    };
 
    // Save user in DB
@@ -73,6 +74,13 @@ export const loginUser = async ({ email, password }: { email: string; password: 
    return {
       accessToken,
       refreshToken,
+      user: {
+         _id: user._id,
+         name: user.name,
+         email: user.email,
+         role: user.role,
+         avatar: user.avatar,
+      }
    };
 };
 

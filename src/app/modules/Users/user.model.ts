@@ -1,5 +1,5 @@
 // 5.Model
-import { model, Schema } from "mongoose"
+import mongoose, { model, Schema } from "mongoose"
 import { IUser } from "./user.interface"
 
 
@@ -11,6 +11,7 @@ const userSchema = new Schema<IUser>(
     role: { type: String, default: "user" },
     status: { type: String, default: "active" },
     avatar: { type: String, default: 'https://static.vecteezy.com/system/resources/previews/021/548/095/non_2x/default-profile-picture-avatar-user-avatar-icon-person-icon-head-icon-profile-picture-icons-default-anonymous-user-male-and-female-businessman-photo-placeholder-social-network-avatar-portrait-free-vector.jpg', required: false },
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Listing' }]
 
   },
   { timestamps: true }

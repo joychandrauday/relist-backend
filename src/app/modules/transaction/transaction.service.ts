@@ -3,11 +3,11 @@ import { transactionModel } from "./transaction.model";
 
 
 const getPurchasesByUserId = async (userId: string) => {
-    return await transactionModel.find({ buyerID: userId }).populate('itemID sellerID');
+    return await transactionModel.find({ buyerID: userId }).populate('itemID sellerID orderID');
 };
 
 const getSalesByUserId = async (userId: string) => {
-    return await transactionModel.find({ sellerID: userId }).populate('itemID buyerID');
+    return await transactionModel.find({ sellerID: userId }).populate('itemID sellerID orderID buyerID');
 };
 
 const createTransaction = async (transactionData: ITransaction) => {

@@ -6,6 +6,8 @@ const auth_routes_1 = require("../modules/auth/auth.routes");
 const listing_route_1 = require("../modules/listings/listing.route");
 const transaction_routes_1 = require("../modules/transaction/transaction.routes");
 const message_routes_1 = require("../modules/messages/message.routes");
+const order_routes_1 = require("../modules/Orders/order.routes");
+const category_routes_1 = require("../modules/category/category.routes");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -28,34 +30,14 @@ const moduleRoutes = [
         path: '/messages',
         route: message_routes_1.messageRouter,
     },
-    // {
-    //    path: '/product',
-    //    route: ProductRoutes,
-    // },
-    // {
-    //    path: '/flash-sale',
-    //    route: FlashSaleRoutes,
-    // },
-    // {
-    //    path: '/order',
-    //    route: OrderRoutes,
-    // },
-    // {
-    //    path: '/coupon',
-    //    route: CouponRoutes,
-    // },
-    // {
-    //    path: '/ssl',
-    //    route: SSLRoutes,
-    // },
-    // {
-    //    path: '/review',
-    //    route: ReviewRoutes,
-    // },
-    // {
-    //    path: '/meta',
-    //    route: MetaRoutes,
-    // },
+    {
+        path: '/orders',
+        route: order_routes_1.orderRoutes,
+    },
+    {
+        path: '/category',
+        route: category_routes_1.categoryRouter,
+    },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 exports.default = router;

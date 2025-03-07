@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 // User Model:
 export interface IUser {
     name: string;
@@ -6,4 +8,5 @@ export interface IUser {
     role: string;
     status: string;
     avatar: string;
+    wishlist: mongoose.Types.ObjectId[];
 }

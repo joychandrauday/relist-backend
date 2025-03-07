@@ -11,7 +11,7 @@ import { userService } from "./user.service";
 const gettingUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Save the new user to the database
-    const user = await userService.getUsers();
+    const user = await userService.getUsers(req.query);
 
     // Send success response
     sendResponse(res, {
@@ -110,12 +110,69 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
+const addToWishlist = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.params.id;
+    const listingId = req.body.listingId;
+    console.log(userId, listingId);
+    // Add the listing to the user's wishlist
+    const updatedUser = await userService.addItemToWishlist(userId, listingId);
 
+    if (!updatedUser) {
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: 'User not found or Listing not found!',
+        data: null,
+      });
+    }
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Item added to wishlist successfully!',
+      data: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Remove item from wishlist
+const removeFromWishlist = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.params.id;
+    const listingId = req.body.listingId;
+
+    // Remove the listing from the user's wishlist
+    const updatedUser = await userService.removeItemFromWishlist(userId, listingId);
+
+    if (!updatedUser) {
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: 'User or Listing not found!',
+        data: null,
+      });
+    }
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Item removed from wishlist successfully!',
+      data: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 // sending to routes
 export const userController = {
   updateUser,
   gettingUsers,
   gettingSingleUser,
   gettingSingleUserById,
-  deleteUser
+  deleteUser,
+  addToWishlist,
+  removeFromWishlist,
 }
