@@ -27,8 +27,8 @@ const mongoose_1 = __importStar(require("mongoose"));
 const messageSchema = new mongoose_1.Schema({
     senderID: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     receiverID: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    message: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now }
+    message: { type: String },
+    image: { type: String, default: null },
 }, { timestamps: true });
 const Message = mongoose_1.default.model('Message', messageSchema);
 exports.default = Message;

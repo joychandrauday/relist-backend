@@ -47,7 +47,8 @@ const productSchema = new Schema<IProduct>({
   },
   quantity: {
     type: Number,
-    required: true
+    required: true,
+    default: 1
   },
   inStock: {
     type: Boolean,

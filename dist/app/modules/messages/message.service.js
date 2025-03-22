@@ -23,8 +23,9 @@ const getUserMessages = (userId, receiverId) => __awaiter(void 0, void 0, void 0
             { senderID: receiverId, receiverID: userId }
         ]
     })
-        .populate('senderID receiverID')
-        .sort({ timestamp: -1 });
+        .populate('senderID receiverID', '-password')
+        .sort({ timestamp: -1 })
+        .select("-password");
 });
 exports.default = {
     sendMessage,

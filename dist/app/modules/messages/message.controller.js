@@ -16,31 +16,62 @@ exports.messageController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const sendResponse_1 = __importDefault(require("../Utils/sendResponse"));
 const message_service_1 = __importDefault(require("./message.service"));
-const nodemailer_1 = __importDefault(require("nodemailer"));
 const user_service_1 = require("../Users/user.service");
-// Setup the nodemailer transporter (you can use your email service here)
-const transporter = nodemailer_1.default.createTransport({
-    host: 'smtp.gmail.com',
-    service: 'gmail',
-    auth: {
-        user: 'joychandraud@gmail.com',
-        pass: 'mkhc ubfy nhwu ituu',
-    }
-});
-// Function to send an email
-const sendEmail = (to, subject, html) => __awaiter(void 0, void 0, void 0, function* () {
-    const mailOptions = {
-        from: process.env.EMAIL_USER, // Sender address
-        to, // Receiver's email address
-        subject, // Subject line
-        html, // HTML message body
-    };
+const user_model_1 = require("../Users/user.model");
+const sendEmailFunc_1 = require("../Utils/sendEmailFunc");
+const getUserSidebarController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield transporter.sendMail(mailOptions);
-        console.log('Email sent successfully!');
+        const { userId, search } = req.body; // Extract from body
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "User ID is required" });
+        }
+        console.log("Logged-in User:", userId);
+        console.log("Search Query:", search);
+        let query = { _id: { $ne: userId } };
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+            ];
+        }
+        const filteredUsers = yield user_model_1.userModel.find(query).select("-password -wishlist");
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.OK,
+            success: true,
+            message: "Users retrieved successfully",
+            data: filteredUsers,
+        });
     }
     catch (error) {
-        console.error('Error sending email:', error);
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+            success: false,
+            message: error instanceof Error ? error.message : "Failed to retrieve users",
+            data: {},
+        });
+    }
+});
+const getUserSidebarSingleController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userId } = req.body; // Extract from body
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "User ID is required" });
+        }
+        const User = yield user_service_1.userService.getSingleUser(userId);
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.OK,
+            success: true,
+            message: "Users retrieved successfully",
+            data: User,
+        });
+    }
+    catch (error) {
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+            success: false,
+            message: error instanceof Error ? error.message : "Failed to retrieve users",
+            data: {},
+        });
     }
 });
 const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -49,11 +80,11 @@ const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         // Send email to the receiver
         const newMessage = yield message_service_1.default.sendMessage(messageData);
         const { receiverID, message } = newMessage;
-        const receiver = yield user_service_1.userService.getSingleUser(receiverID.toString()); // Assume you have a method to get user info
-        console.log(receiver);
+        const receiver = yield user_service_1.userService.getSingleUser(receiverID.toString());
         if (!receiver)
             return;
-        const receiverEmail = receiver.email; // Assuming user has an email field
+        const receiverEmail = receiver.email;
+        // Send email to the receiver
         const emailSubject = 'You have a new message!';
         const emailBody = `
         <html>
@@ -116,7 +147,7 @@ const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
           </body>
         </html>
       `;
-        yield sendEmail(receiverEmail, emailSubject, emailBody); // Send email to the receiver
+        yield (0, sendEmailFunc_1.sendEmail)(receiverEmail, emailSubject, emailBody);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_codes_1.StatusCodes.CREATED,
             success: true,
@@ -163,5 +194,7 @@ const getUserMessages = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 exports.messageController = {
     getUserMessages,
-    sendMessage
+    sendMessage,
+    getUserSidebarController,
+    getUserSidebarSingleController
 };

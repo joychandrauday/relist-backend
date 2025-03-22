@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable prefer-const */
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../Utils/sendResponse';

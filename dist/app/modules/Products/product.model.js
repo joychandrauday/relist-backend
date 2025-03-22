@@ -14,26 +14,56 @@ exports.productModel = void 0;
 const mongoose_1 = require("mongoose");
 // single product schema
 const productSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    rating: { type: Number, default: 0 }, // Default rating is 0
-    brand: { type: String, required: true },
+    name: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    rating: {
+        type: Number,
+        default: 0
+    }, // Default rating is 0
+    brand: {
+        type: String,
+        required: true
+    },
     status: {
         type: String,
         enum: ['sale', 'featured', 'hot'],
         default: 'featured',
     },
-    price: { type: Number, required: true },
-    discount: { type: Number },
+    price: {
+        type: Number,
+        required: true
+    },
+    discount: {
+        type: Number
+    },
     category: {
         type: String,
         enum: ['Writing', 'Office', 'Art', 'Educational', 'Technology', 'Others'],
         required: true,
     },
-    images: { type: [String], required: true },
-    featuredImages: { type: String, required: true },
-    quantity: { type: Number, required: true },
-    inStock: { type: Boolean, required: true, default: true },
+    images: {
+        type: [String],
+        required: true
+    },
+    featuredImages: {
+        type: String,
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        default: 1
+    },
+    inStock: {
+        type: Boolean,
+        required: true, default: true
+    },
     reviews: [
         {
             userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
