@@ -16,10 +16,15 @@ const message_model_1 = __importDefault(require("./message.model"));
 const sendMessage = (messageData) => __awaiter(void 0, void 0, void 0, function* () {
     return yield message_model_1.default.create(messageData);
 });
-const getUserMessages = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserMessages = (userId, receiverId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield message_model_1.default.find({
-        $or: [{ senderID: userId }, { receiverID: userId }]
-    }).populate('senderID receiverID').sort({ timestamp: -1 });
+        $or: [
+            { senderID: userId, receiverID: receiverId },
+            { senderID: receiverId, receiverID: userId }
+        ]
+    })
+        .populate('senderID receiverID')
+        .sort({ timestamp: -1 });
 });
 exports.default = {
     sendMessage,

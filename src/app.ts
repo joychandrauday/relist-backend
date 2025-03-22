@@ -7,39 +7,23 @@ import router from './app/routes';
 import os from "os";
 import { StatusCodes } from "http-status-codes";
 import globalErrorHandler from './app/modules/Utils/errorHandler';
+import { Server } from 'socket.io';
+import { createServer } from 'http';
 
 
 const app: Application = express();
+export const server = createServer(app)
 
-// Middleware
-// app.use(express.json());
-// const allowedOrigins = [
-//   'https://student-stationary-frontend.vercel.app',
-//   'http://localhost:5173',
-//   'http://localhost:5174',
-//   'http://localhost:5175',
-// ];
-
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         return callback(null, true);
-//       }
-//       return callback(new Error('Not allowed by CORS'));
-//     },
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-//     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-//     credentials: true,
-//   })
-// );
-// app.options('*', cors())
-// app.use(bodyParser.json());
-//parsers
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST']
+  }
+})
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors({ origin: ["http://localhost:3000", "https://re-list.vercel.app", "https://relistshop.vercel.app"], credentials: true }));
+app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3002", "https://re-list.vercel.app", "https://relistshop.vercel.app"], credentials: true }));
 
 
 // Default route
@@ -72,6 +56,32 @@ app.get("/", (req: Request, res: Response) => {
       email: "joychandraud@gmail.com",
       website: "joychandrauday.vercel.app",
     },
+  });
+});
+let onlineUsers: unknown[] = [];
+
+io.on('connection', (socket) => {
+  console.log('A user connected', socket.id);
+  // Listen for the "userLoggedIn" event
+  socket.on('userLoggedIn', (userId) => {
+    console.log(`User with ID ${userId} logged in`);
+
+    // Add user to online users list (or perform any other action)
+    onlineUsers.push(userId);
+
+    // Emit the updated online users list to all connected clients
+    io.emit('onlineUsers', onlineUsers);
+  });
+  console.log(onlineUsers);
+  // Handle user disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected', socket.id);
+
+    // Remove the user from the onlineUsers list on disconnect
+    onlineUsers = onlineUsers.filter((id) => id !== socket.id);
+
+    // Emit the updated online users list to all connected clients
+    io.emit('onlineUsers', onlineUsers);
   });
 });
 

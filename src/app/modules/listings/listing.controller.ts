@@ -122,7 +122,19 @@ const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
             throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
 
         }
-        console.log(existingListing);
+        if (req.user.role === 'admin') {
+            // Update the listing
+            const updatedListing = req.body;
+            const updatedListingData = await listingService.updateListingService(listingId, updatedListing);
+
+            // Send success response
+            sendResponse(res, {
+                statusCode: StatusCodes.OK,
+                success: true,
+                message: 'Listing updated successfully',
+                data: updatedListingData
+            });
+        }
         // Ensure the user is authorized to update the listing
         if (existingListing.userID._id.toString() !== user._id.toString()) {
             throw new AppError(StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');

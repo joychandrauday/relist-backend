@@ -121,7 +121,18 @@ const updatingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (!user) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
-        console.log(existingListing);
+        if (req.user.role === 'admin') {
+            // Update the listing
+            const updatedListing = req.body;
+            const updatedListingData = yield listing_service_1.listingService.updateListingService(listingId, updatedListing);
+            // Send success response
+            (0, sendResponse_1.default)(res, {
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                success: true,
+                message: 'Listing updated successfully',
+                data: updatedListingData
+            });
+        }
         // Ensure the user is authorized to update the listing
         if (existingListing.userID._id.toString() !== user._id.toString()) {
             throw new AppError_1.default(http_status_codes_1.StatusCodes.FORBIDDEN, 'You are not authorized to update this listing');

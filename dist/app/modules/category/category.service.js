@@ -19,7 +19,16 @@ const addCategory = (category) => __awaiter(void 0, void 0, void 0, function* ()
 const getCategory = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield category_model_1.default.find();
 });
+// edit category using put method
+const editCategory = (categoryId, updatedCategory) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield category_model_1.default.findByIdAndUpdate(categoryId, updatedCategory, { new: true });
+});
+const deleteCategory = (categoryId) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield category_model_1.default.findByIdAndDelete(categoryId);
+});
 exports.default = {
     addCategory,
-    getCategory
+    getCategory,
+    editCategory,
+    deleteCategory
 };

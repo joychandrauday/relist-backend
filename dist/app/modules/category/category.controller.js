@@ -63,7 +63,56 @@ const getCategoryAll = (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
 });
+// editing category using put method
+const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const categoryId = req.params.id;
+        const categoryData = req.body;
+        const updatedCategory = yield category_service_1.default.editCategory(categoryId, categoryData);
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.OK,
+            success: true,
+            message: 'Category updated successfully',
+            data: updatedCategory
+        });
+    }
+    catch (error) {
+        let errorMessage = 'Failed to update category';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+            success: false,
+            message: errorMessage,
+            data: {}
+        });
+    }
+});
+// deleting category using delete method
+const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const categoryId = req.params.id;
+        console.log(categoryId);
+        yield category_service_1.default.deleteCategory(categoryId);
+        res.status(204).send();
+    }
+    catch (error) {
+        let errorMessage = 'Failed to delete category';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+            success: false,
+            message: errorMessage,
+            data: {}
+        });
+    }
+});
 exports.categoryController = {
     addCategory,
-    getCategoryAll
+    getCategoryAll,
+    updateCategory,
+    deleteCategory,
 };

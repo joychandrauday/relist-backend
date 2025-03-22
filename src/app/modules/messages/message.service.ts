@@ -5,11 +5,18 @@ const sendMessage = async (messageData: IMessage) => {
     return await Message.create(messageData);
 };
 
-const getUserMessages = async (userId: string) => {
+const getUserMessages = async (userId: string, receiverId: string) => {
     return await Message.find({
-        $or: [{ senderID: userId }, { receiverID: userId }]
-    }).populate('senderID receiverID').sort({ timestamp: -1 });
+        $or: [
+            { senderID: userId, receiverID: receiverId },
+            { senderID: receiverId, receiverID: userId }
+        ]
+    })
+        .populate('senderID receiverID', '-password')
+        .sort({ timestamp: -1 })
+        .select("-password");
 };
+
 
 export default {
     sendMessage,
