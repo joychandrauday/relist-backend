@@ -114,7 +114,7 @@ const addToWishlist = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const userId = req.params.id;
     const listingId = req.body.listingId;
-    console.log(userId, listingId);
+
     // Add the listing to the user's wishlist
     const updatedUser = await userService.addItemToWishlist(userId, listingId);
 

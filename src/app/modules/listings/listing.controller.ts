@@ -134,6 +134,7 @@ const updatingListing = async (req: AuthenticatedRequest, res: Response) => {
                 message: 'Listing updated successfully',
                 data: updatedListingData
             });
+            return;
         }
         // Ensure the user is authorized to update the listing
         if (existingListing.userID._id.toString() !== user._id.toString()) {

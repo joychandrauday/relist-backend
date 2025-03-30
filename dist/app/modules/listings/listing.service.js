@@ -10,8 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listingService = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const listing_model_1 = require("./listing.model");
 const createListingService = (listingData) => __awaiter(void 0, void 0, void 0, function* () {
     const newListing = new listing_model_1.listingModel(listingData);
@@ -23,8 +27,11 @@ const getAllListingsService = (query) => __awaiter(void 0, void 0, void 0, funct
     if (status) {
         filters.status = status;
     }
-    if (category) {
-        filters.category = category;
+    if (category && typeof category === 'string' && category !== '{}' && mongoose_1.default.Types.ObjectId.isValid(category)) {
+        filters.category = new mongoose_1.default.Types.ObjectId(category); // Use the valid ObjectId
+    }
+    else if (category && category === '{}') {
+        console.error('Invalid category passed (empty object)');
     }
     if (condition) {
         filters.condition = condition;
@@ -54,7 +61,7 @@ const getAllListingsService = (query) => __awaiter(void 0, void 0, void 0, funct
     const skip = (pageNumber - 1) * limitNumber;
     const totalListings = yield listing_model_1.listingModel.countDocuments(filters);
     let listingsQuery = listing_model_1.listingModel.find(filters);
-    listingsQuery.populate("userID", 'name email avatar _id');
+    listingsQuery.populate("userID", 'name email avatar _id').populate("category", 'name description icon _id');
     listingsQuery = listingsQuery.sort({ createdAt: -1 });
     if (limitNumber > 0) {
         listingsQuery.skip(skip).limit(limitNumber);

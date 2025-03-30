@@ -10,14 +10,11 @@ import { sendEmail } from '../Utils/sendEmailFunc';
 
 const getUserSidebarController = async (req: Request, res: Response) => {
   try {
-    const { userId, search } = req.body;  // Extract from body
+    const { userId, search } = req.body;
 
     if (!userId) {
       return res.status(400).json({ success: false, message: "User ID is required" });
     }
-
-    console.log("Logged-in User:", userId);
-    console.log("Search Query:", search);
 
     let query: any = { _id: { $ne: userId } };
 
@@ -45,6 +42,7 @@ const getUserSidebarController = async (req: Request, res: Response) => {
     });
   }
 };
+
 const getUserSidebarSingleController = async (req: Request, res: Response) => {
   try {
     const { userId } = req.body;  // Extract from body

@@ -46,7 +46,7 @@ const gettingSingleOrder = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const orders = yield order_service_1.orderService.getOrderById(req.params.orderId);
         res.status(200).json({
-            message: 'Order fetched successfully',
+            message: 'Order fetched successfully with products',
             status: true,
             data: orders,
         });

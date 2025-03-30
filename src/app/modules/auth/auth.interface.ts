@@ -14,10 +14,9 @@ export interface IAuth {
 }
 
 export interface IJwtPayload {
+  id: string
   userId: string;
   name: string;
   email: string;
-  hasShop: boolean;
   role: string;
-  isActive: boolean;
 }

@@ -132,6 +132,7 @@ const updatingListing = (req, res) => __awaiter(void 0, void 0, void 0, function
                 message: 'Listing updated successfully',
                 data: updatedListingData
             });
+            return;
         }
         // Ensure the user is authorized to update the listing
         if (existingListing.userID._id.toString() !== user._id.toString()) {

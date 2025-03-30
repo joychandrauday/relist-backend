@@ -21,12 +21,10 @@ const user_model_1 = require("../Users/user.model");
 const sendEmailFunc_1 = require("../Utils/sendEmailFunc");
 const getUserSidebarController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userId, search } = req.body; // Extract from body
+        const { userId, search } = req.body;
         if (!userId) {
             return res.status(400).json({ success: false, message: "User ID is required" });
         }
-        console.log("Logged-in User:", userId);
-        console.log("Search Query:", search);
         let query = { _id: { $ne: userId } };
         if (search) {
             query.$or = [

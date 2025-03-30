@@ -9,7 +9,6 @@ const addingOrder = async (req: Request, res: Response) => {
     req.ip as string,
     req.body
   );
-
   res.status(200).json({
     message: 'Orders Placed successfully',
     status: true,
@@ -40,7 +39,7 @@ const gettingSingleOrder = async (req: Request, res: Response) => {
   try {
     const orders = await orderService.getOrderById(req.params.orderId);
     res.status(200).json({
-      message: 'Order fetched successfully',
+      message: 'Order fetched successfully with products',
       status: true,
       data: orders,
     })

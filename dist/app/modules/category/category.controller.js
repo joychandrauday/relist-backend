@@ -93,7 +93,6 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categoryId = req.params.id;
-        console.log(categoryId);
         yield category_service_1.default.deleteCategory(categoryId);
         res.status(204).send();
     }

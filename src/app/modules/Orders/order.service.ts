@@ -6,6 +6,7 @@ import { userService } from '../Users/user.service';
 import { IOrder } from './order.interface'
 import { orderModel } from './order.model'
 import { orderUtils } from './order.utils'
+import { listingModel } from '../listings/listing.model';
 
 interface newOrder {
   user: string,
@@ -20,8 +21,9 @@ const addOrderToDB = async (
   newOrder: newOrder
 ) => {
   const user = await userService.getSingleUser(newOrder.user)
+  console.log(newOrder, 'new order');
   let order = await orderModel.create(newOrder);
-
+  console.log(order, 'adding');
   const paymentDetails = {
     amount: order.amount,
     order_id: order._id,
@@ -53,21 +55,30 @@ const getOrders = async (startDate?: string, endDate?: string) => {
 
   if (startDate && endDate) {
     filter.orderDate = {
-      $gte: new Date(startDate), // বড় বা সমান
-      $lte: new Date(endDate),   // ছোট বা সমান
+      $gte: new Date(startDate),
+      $lte: new Date(endDate),
     };
   }
 
   const orders = await orderModel
     .find(filter)
-    .populate('user', 'name email')
-    .populate('products.productId', 'name price featuredImages');
-  return orders
+    .populate('user', 'name email role')
+    .populate({
+      path: 'products.productId',
+      select: 'name price featuredImages',
+    });
+
+  return orders;
+
+
 }
 // get single order
 
 const getOrderById = async (orderId: string) => {
-  const order = await orderModel.findById(orderId).populate('user', 'name email avatar')
+  const order = await orderModel.findById(orderId).populate('user', 'name email avatar').populate({
+    path: 'products.productId',
+    select: 'title price images',
+  });
   return order
 }
 
@@ -77,9 +88,11 @@ const getOrdersByUserId = async (userId: string) => {
     const orders = await orderModel
       .find({ user: new mongoose.Types.ObjectId(userId) })
       .populate('user', 'name email')
-      .populate('product.productId', 'title images price')
+      .populate({
+        path: 'products.productId',
+        select: 'title price images',
+      });
 
-    console.log(orders);
     return orders;
   } catch (error) {
     console.log(error);
@@ -133,7 +146,7 @@ const verifyPayment = async (sp_trxn_id: string) => {
   const verifiedResponse = await orderUtils.verifyPayment(sp_trxn_id);
 
   if (verifiedResponse.length) {
-    await orderModel.findOneAndUpdate(
+    const updatedOrder = await orderModel.findOneAndUpdate(
       { "transaction.id": sp_trxn_id },
       {
         "transaction.code": verifiedResponse[0].sp_code,
@@ -143,23 +156,45 @@ const verifyPayment = async (sp_trxn_id: string) => {
         "transaction.bank_status": verifiedResponse[0].bank_status,
         "transaction.date_time": verifiedResponse[0].date_time,
         'paymentStatus':
-          verifiedResponse[0].bank_status == "Success"
+          verifiedResponse[0].bank_status === "Success"
             ? "Paid"
-            : verifiedResponse[0].bank_status == "Cancel"
+            : verifiedResponse[0].bank_status === "Cancel"
               ? "Cancelled"
               : "Pending",
+        'orderStatus': verifiedResponse[0].bank_status === "Success"
+          ? "Processing"
+          : verifiedResponse[0].bank_status === "Cancel"
+            ? "Cancelled"
+            : "Pending",
       },
-      // {
-      //   'paymentStatus': verifiedResponse[0].bank_status == "Success"
-      //     ? "Paid"
-      //     : verifiedResponse[0].bank_status == "Cancel"
-      //       ? "Cancelled"
-      //       : "Pending",
-      // }
-    );
+      { new: true }
+    ).populate('products.productId'); // Populate to get product details
+
+    if (updatedOrder && verifiedResponse[0].bank_status === "Success") {
+      for (const product of updatedOrder.products) {
+        // Reduce the product quantity and update status if it reaches 0
+        const updatedProduct = await listingModel.findByIdAndUpdate(
+          product.productId._id,
+          {
+            $inc: { quantity: -product.quantity }, // Reduce stock
+          },
+          { new: true }
+        );
+
+        // If quantity is 0, set status to "sold"
+        if (updatedProduct && updatedProduct.quantity <= 0) {
+          await listingModel.findByIdAndUpdate(
+            product.productId._id,
+            { $set: { status: "sold" } }, // Update status
+            { new: true }
+          );
+        }
+      }
+    }
   }
   return verifiedResponse;
 };
+
 
 // sending all to controller
 export const orderService = {

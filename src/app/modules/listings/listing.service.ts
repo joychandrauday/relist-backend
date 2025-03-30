@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // services/listingService.ts
 
+import mongoose from "mongoose";
 import { IListing } from "./listing.interface";
 import { listingModel } from "./listing.model";
 
@@ -18,9 +19,15 @@ const getAllListingsService = async (query: Record<string, unknown>) => {
     if (status) {
         filters.status = status;
     }
-    if (category) {
-        filters.category = category;
+
+
+    if (category && typeof category === 'string' && category !== '{}' && mongoose.Types.ObjectId.isValid(category)) {
+        filters.category = new mongoose.Types.ObjectId(category); // Use the valid ObjectId
+    } else if (category && category === '{}') {
+        console.error('Invalid category passed (empty object)');
     }
+
+
     if (condition) {
         filters.condition = condition;
     }
@@ -56,7 +63,7 @@ const getAllListingsService = async (query: Record<string, unknown>) => {
     const totalListings = await listingModel.countDocuments(filters);
 
     let listingsQuery = listingModel.find(filters);
-    listingsQuery.populate("userID", 'name email avatar _id');
+    listingsQuery.populate("userID", 'name email avatar _id').populate("category", 'name description icon _id');
     listingsQuery = listingsQuery.sort({ createdAt: -1 });
 
     if (limitNumber > 0) {

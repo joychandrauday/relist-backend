@@ -8,6 +8,8 @@ const transaction_routes_1 = require("../modules/transaction/transaction.routes"
 const message_routes_1 = require("../modules/messages/message.routes");
 const order_routes_1 = require("../modules/Orders/order.routes");
 const category_routes_1 = require("../modules/category/category.routes");
+const flashSale_routes_1 = require("../modules/flashSell/flashSale.routes");
+const newsletter_route_1 = require("../modules/newsletter/newsletter.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -37,6 +39,14 @@ const moduleRoutes = [
     {
         path: '/category',
         route: category_routes_1.categoryRouter,
+    },
+    {
+        path: '/flash-sale',
+        route: flashSale_routes_1.FlashSaleRoutes,
+    },
+    {
+        path: '/newsletter',
+        route: newsletter_route_1.NewsLetterRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

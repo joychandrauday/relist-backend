@@ -22,11 +22,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listingModel = void 0;
-// models/listing.model.ts
 const mongoose_1 = __importStar(require("mongoose"));
-// single product schema
+const flashSale_model_1 = require("../flashSell/flashSale.model");
 const listingSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
@@ -37,17 +45,40 @@ const listingSchema = new mongoose_1.Schema({
     },
     price: { type: Number, required: true },
     images: { type: [String], required: true },
-    userID: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
-    category: { type: String, required: true },
+    userID: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
+    category: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Category', required: true },
     condition: {
         type: String,
         required: true,
-        enum: ['Brand New', 'Like New', 'Excellent', 'Very Good', 'Good', 'Fair', 'Refurbished', 'For Parts / Not Working']
+        enum: ['Brand New', 'Like New', 'Excellent', 'Very Good', 'Good', 'Fair', 'Refurbished', 'For Parts / Not Working'],
     },
     location: {
-        city: { type: String, required: true, },
+        city: { type: String, required: true },
         state: { type: String }, // optional
-        country: { type: String, required: true }
-    }
+        country: { type: String, required: true },
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        default: 1,
+    },
+    offerPrice: {
+        type: Number,
+        default: 0,
+    },
 }, { timestamps: true });
+listingSchema.methods.calculateOfferPrice = function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(`Running calculateOfferPrice for listing: ${this._id}`);
+        const flashSale = yield flashSale_model_1.FlashSale.findOne({ product: this._id });
+        console.log("Found Flash Sale:", flashSale);
+        if (flashSale) {
+            const discount = (flashSale.discountPercentage / 100) * this.price;
+            this.offerPrice = this.price - discount;
+            yield this.save();
+            return this.offerPrice;
+        }
+        return null;
+    });
+};
 exports.listingModel = (0, mongoose_1.model)('Listing', listingSchema);

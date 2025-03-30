@@ -19,10 +19,13 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const user_service_1 = require("../Users/user.service");
 const order_model_1 = require("./order.model");
 const order_utils_1 = require("./order.utils");
+const listing_model_1 = require("../listings/listing.model");
 // create a new order
 const addOrderToDB = (client_ip, newOrder) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_service_1.userService.getSingleUser(newOrder.user);
+    console.log(newOrder, 'new order');
     let order = yield order_model_1.orderModel.create(newOrder);
+    console.log(order, 'adding');
     const paymentDetails = {
         amount: order.amount,
         order_id: order._id,
@@ -50,19 +53,25 @@ const getOrders = (startDate, endDate) => __awaiter(void 0, void 0, void 0, func
     const filter = {};
     if (startDate && endDate) {
         filter.orderDate = {
-            $gte: new Date(startDate), // বড় বা সমান
-            $lte: new Date(endDate), // ছোট বা সমান
+            $gte: new Date(startDate),
+            $lte: new Date(endDate),
         };
     }
     const orders = yield order_model_1.orderModel
         .find(filter)
-        .populate('user', 'name email')
-        .populate('products.productId', 'name price featuredImages');
+        .populate('user', 'name email role')
+        .populate({
+        path: 'products.productId',
+        select: 'name price featuredImages',
+    });
     return orders;
 });
 // get single order
 const getOrderById = (orderId) => __awaiter(void 0, void 0, void 0, function* () {
-    const order = yield order_model_1.orderModel.findById(orderId).populate('user', 'name email avatar');
+    const order = yield order_model_1.orderModel.findById(orderId).populate('user', 'name email avatar').populate({
+        path: 'products.productId',
+        select: 'title price images',
+    });
     return order;
 });
 const getOrdersByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -70,8 +79,10 @@ const getOrdersByUserId = (userId) => __awaiter(void 0, void 0, void 0, function
         const orders = yield order_model_1.orderModel
             .find({ user: new mongoose_1.default.Types.ObjectId(userId) })
             .populate('user', 'name email')
-            .populate('product.productId', 'title images price');
-        console.log(orders);
+            .populate({
+            path: 'products.productId',
+            select: 'title price images',
+        });
         return orders;
     }
     catch (error) {
@@ -114,19 +125,37 @@ const calculateRevenueService = () => __awaiter(void 0, void 0, void 0, function
 const verifyPayment = (sp_trxn_id) => __awaiter(void 0, void 0, void 0, function* () {
     const verifiedResponse = yield order_utils_1.orderUtils.verifyPayment(sp_trxn_id);
     if (verifiedResponse.length) {
-        yield order_model_1.orderModel.findOneAndUpdate({ "transaction.id": sp_trxn_id }, {
+        const updatedOrder = yield order_model_1.orderModel.findOneAndUpdate({ "transaction.id": sp_trxn_id }, {
             "transaction.code": verifiedResponse[0].sp_code,
             "transaction.message": verifiedResponse[0].sp_message,
             "transaction.status": verifiedResponse[0].transaction_status,
             "transaction.method": verifiedResponse[0].method,
             "transaction.bank_status": verifiedResponse[0].bank_status,
             "transaction.date_time": verifiedResponse[0].date_time,
-            'paymentStatus': verifiedResponse[0].bank_status == "Success"
+            'paymentStatus': verifiedResponse[0].bank_status === "Success"
                 ? "Paid"
-                : verifiedResponse[0].bank_status == "Cancel"
+                : verifiedResponse[0].bank_status === "Cancel"
                     ? "Cancelled"
                     : "Pending",
-        });
+            'orderStatus': verifiedResponse[0].bank_status === "Success"
+                ? "Processing"
+                : verifiedResponse[0].bank_status === "Cancel"
+                    ? "Cancelled"
+                    : "Pending",
+        }, { new: true }).populate('products.productId'); // Populate to get product details
+        if (updatedOrder && verifiedResponse[0].bank_status === "Success") {
+            for (const product of updatedOrder.products) {
+                // Reduce the product quantity and update status if it reaches 0
+                const updatedProduct = yield listing_model_1.listingModel.findByIdAndUpdate(product.productId._id, {
+                    $inc: { quantity: -product.quantity }, // Reduce stock
+                }, { new: true });
+                // If quantity is 0, set status to "sold"
+                if (updatedProduct && updatedProduct.quantity <= 0) {
+                    yield listing_model_1.listingModel.findByIdAndUpdate(product.productId._id, { $set: { status: "sold" } }, // Update status
+                    { new: true });
+                }
+            }
+        }
     }
     return verifiedResponse;
 });

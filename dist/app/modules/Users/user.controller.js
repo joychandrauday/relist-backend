@@ -116,7 +116,6 @@ const addToWishlist = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     try {
         const userId = req.params.id;
         const listingId = req.body.listingId;
-        console.log(userId, listingId);
         // Add the listing to the user's wishlist
         const updatedUser = yield user_service_1.userService.addItemToWishlist(userId, listingId);
         if (!updatedUser) {

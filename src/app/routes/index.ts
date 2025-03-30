@@ -6,6 +6,8 @@ import { TransactionRoutes } from '../modules/transaction/transaction.routes';
 import { messageRouter } from '../modules/messages/message.routes';
 import { orderRoutes } from '../modules/Orders/order.routes';
 import { categoryRouter } from '../modules/category/category.routes';
+import { FlashSaleRoutes } from '../modules/flashSell/flashSale.routes';
+import { NewsLetterRoutes } from '../modules/newsletter/newsletter.route';
 
 const router = Router();
 
@@ -38,6 +40,14 @@ const moduleRoutes = [
    {
       path: '/category',
       route: categoryRouter,
+   },
+   {
+      path: '/flash-sale',
+      route: FlashSaleRoutes,
+   },
+   {
+      path: '/newsletter',
+      route: NewsLetterRoutes,
    },
 
 ];
