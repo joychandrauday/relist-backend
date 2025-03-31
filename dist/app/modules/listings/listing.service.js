@@ -76,7 +76,7 @@ const getAllListingsService = (query) => __awaiter(void 0, void 0, void 0, funct
     return { listings, meta };
 });
 const getListingByIdService = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield listing_model_1.listingModel.findById(id).populate("userID", 'name email avatar _id');
+    return yield listing_model_1.listingModel.findById(id).populate("userID", 'name email avatar _id').populate('category');
 });
 const updateListingService = (id, updateData) => __awaiter(void 0, void 0, void 0, function* () {
     return yield listing_model_1.listingModel.findByIdAndUpdate(id, updateData, { new: true });

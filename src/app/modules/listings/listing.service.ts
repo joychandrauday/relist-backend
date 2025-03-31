@@ -85,7 +85,7 @@ const getAllListingsService = async (query: Record<string, unknown>) => {
 
 
 const getListingByIdService = async (id: string) => {
-    return await listingModel.findById(id).populate("userID", 'name email avatar _id');
+    return await listingModel.findById(id).populate("userID", 'name email avatar _id').populate('category');
 };
 
 const updateListingService = async (id: string, updateData: IListing) => {
